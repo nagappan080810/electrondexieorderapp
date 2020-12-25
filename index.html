@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World!</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <style>
+      #result {
+        color: green;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+       const renderer = require('./dist/renderer.js');
+    </script>
+    <h1>Quick Order App</h1>
+    <div>
+      <label>Customer Name:</label>
+      <input type="text" id="custname">
+      <label>Mobile No:</label>
+      <input type="text" id="mobileno">
+    </div>
+    <h3>Bill Details</h3>
+    <form> 
+      <table  class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Controls</th>
+          </tr>
+        </thead>
+        <tbody>
+        <tr style="vertical-align: middle;">
+          <td>
+            <select class="prd" onfocus="renderer.loadDropdown(event)"  style="height: 30px; width: 200px">
+              <option disabled>Select Product</option>
+            </select>
+          </td>
+          <td><input class="qty" type="number" style="width: 45px"></td>
+          <td><input class="price" type="number"></td>
+          <td>
+            <button class="btn btn-danger" type="button" onclick="renderer.delItem(event)">Delete</button>
+            <button class="btn btn-primary" type="button" onclick="renderer.addItem(event)">Add</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <button onclick="renderer.createOrder(event)" type="button">Save</button>
+      <div id="result"></div>
+    </form>
+    <!-- You can also require other files to run in this process -->
+  </body>
+</html>
