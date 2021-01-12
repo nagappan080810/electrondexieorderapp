@@ -6,9 +6,14 @@
 // needed in the renderer process.
 import dexiedbmanager from './dexiedbmanager';
 import { Product, OrderDetail, Order, Customer } from './models';
+
+let QRCode = require('qrcode');
+let canvas: HTMLElement = undefined;
+
 const optionElements: HTMLOptionElement[] = [];
 
 window.addEventListener("DOMContentLoaded", ()=>{
+    canvas = document.getElementById('canvas');
     dexiedbmanager.loadProducts().then((products: Product[])=>{
         products.forEach(product => {
             const optionElement = document.createElement("option");
@@ -51,31 +56,33 @@ export async function createOrder(evt: any) {
     const order: Order = {
         date: new Date(), mobileno, name
     }
-    const orderId: number = await dexiedbmanager.createorder(order);
-    let totalAmount = 0, totalQuantities = 0;
-    const orderItems: OrderDetail[] = []; 
-    for (let i=0; i< selectedProducts.length; i++) {
-        const prdElem = selectedProducts.item(i) as HTMLSelectElement;
-        console.log(prdElem.value);
-        const qtyElem = quantities.item(i) as HTMLInputElement;
-        console.log(qtyElem.value);
-        const priceElem = prices.item(i) as HTMLInputElement;
-        console.log(priceElem.value);
-        const productId = parseInt(prdElem.value);
-        const qty = parseInt(qtyElem.value);
-        const price = parseInt(priceElem.value);
-        totalQuantities += qty;
-        totalAmount +=  qty * price;
-        const orderItem: OrderDetail = {orderId, productId, qty, price};
-        orderItems.push(orderItem);
-    }
-    order.totalprice = totalAmount;
-    order.totalqty = totalQuantities;
-    dexiedbmanager.updateOrder(order, orderItems).then(() => {
-        console.log("order saved successfully");
-        const result = document.getElementById("result") as HTMLDivElement;
-        result.innerText = `${JSON.stringify(order)} --> ${JSON.stringify(orderItems)}`;
-    });
+const orderId: number = await dexiedbmanager.createorder(order);
+let totalAmount = 0, totalQuantities = 0;
+const orderItems: OrderDetail[] = []; 
+for (let i=0; i< selectedProducts.length; i++) {
+    const prdElem = selectedProducts.item(i) as HTMLSelectElement;
+    const qtyElem = quantities.item(i) as HTMLInputElement;
+    const priceElem = prices.item(i) as HTMLInputElement;
+    const productId = parseInt(prdElem.value);
+    const qty = parseInt(qtyElem.value);
+    const price = parseInt(priceElem.value);
+    totalQuantities += qty;
+    totalAmount +=  qty * price;
+    const orderItem: OrderDetail = {orderId, productId, qty, price};
+    orderItems.push(orderItem);
+}
+order.totalprice = totalAmount;
+order.totalqty = totalQuantities;
+dexiedbmanager.updateOrder(order, orderItems).then(() => {
+    console.log("order saved successfully");
+    const result = document.getElementById("result") as HTMLDivElement;
+    result.innerText = `Order Id - ${order.id} | Total Qty - ${order.totalqty} | Total Amt - ${order.totalprice}`;
+    QRCode.toCanvas(canvas, result.innerText,  (error: any) => {
+        if (error) console.error(`error happened ${error}`);
+        console.log('success!');
+      })
+
+});
 }
 
 export function delItem(evt: any) {

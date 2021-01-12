@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Hello World!</title>
+    <title>Quick Bill Book</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <style>
       #result {
@@ -48,8 +48,11 @@
         </tr>
         </tbody>
       </table>
-      <button onclick="renderer.createOrder(event)" type="button">Save</button>
-      <div id="result"></div>
+      <button onclick="renderer.createOrder(event)" type="button">Bill</button>
+      <div>
+        <div id="result" style="font-size: 26px;"></div>
+        <canvas id="canvas"></canvas>
+      </div>
     </form>
     <!-- You can also require other files to run in this process -->
   </body>

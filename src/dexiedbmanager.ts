@@ -30,79 +30,70 @@ class DexieDBManager {
       console.log("database initialized");
     }
 
-    loadProducts(): Promise<Product[]> {
-      return new Promise((resolve, reject) => {
-        const table: Dexie.Table<Product, number> = this.getTable("product");
-        table.clear();
-        table.bulkPut(PRODUCTSDB, {allKeys: true}).then(keys => {
-          return resolve(table.bulkGet(keys));
+    async loadProducts(): Promise<Product[]> {
+      const table: Dexie.Table<Product, number> = this.getTable("product");
+      return table.clear().then(() => {
+        return table.bulkPut(PRODUCTSDB, {allKeys: true}).then(keys => {
+          return table.bulkGet(keys).then((products: Product[])=>{
+            return products;
+          });
         }).catch(error => {
           console.log(`error while loading the products ${error}`);
-          reject("failed to load the products");
+          throw new Error("failed to load the products");
         });
       });
     }
 
     createorder(order: Order): Promise<number> {
       const table: Table<Order, number> = this.getTable("order");
-      return new Promise((resolve, reject) => {
-        table.add(order).then((id) => {
-          return resolve(id);
+        return table.add(order).then(id => {
+          return id;
         })
         .catch(err => {
           console.log(`error while creating the order ${err}`);
-          reject("failed to create the order");
+          throw new Error("failed to create the order");
         });
-      });
     }
 
     updateOrder(order: Order, orderitems: OrderDetail[]): Promise<boolean> {
       const orderTable: Table<Order, number> = this.getTable("order");
       const orderDetailTable: Table<OrderDetail, number> = this.getTable("orderdetail");
-      return new Promise((resolve, reject) => {
-        orderTable.put(order).then((id) => {
-          orderDetailTable.bulkPut(orderitems).then(ids => {return resolve(true);}).catch(err => {
+      return orderTable.put(order).then((id) => {
+          return orderDetailTable.bulkPut(orderitems).then(ids => {return true;}).catch(err => {
             console.log(`error while creating the order items ${err}`);
-            reject("failed to create the order and order items");
-          })
-        })
-      }); 
+            throw new Error("failed to create the order and order items");
+          });
+        });
     }
 
     createcustomer(customer: Customer): Promise<boolean> {
       const table: Table<Customer, string> = this.getTable("customer");
-      return new Promise((resolve, reject) => {
-        table.put(customer).then((custmobile: string) => {
-          return resolve(true);
+      return table.put(customer).then((custmobile: string) => {
+          return true;
         }).catch(err => {
           console.log(`error while creating the customer ${err}`);
-            reject("failed to create the customer");
+          throw new Error("failed to create the customer");
         });
-      });
     }
 
     getCustomer(custmobile: string): Promise<Customer> {
       const table: Table<Customer, string> = this.getTable("customer");
-      return new Promise((resolve, reject) => {
-        table.where({mobileno: custmobile}).toArray().then((customers: Customer[]) => {
-          return resolve(customers[0]);
+        return table.where({mobileno: custmobile}).toArray().then((customers: Customer[]) => {
+          return customers[0];
         }).catch(err => {
           console.log(`error while fetching customer by mobileno ${err} for ${custmobile}`);
-          reject("Failed to get the customer ")
+          throw new Error("Failed to get the customer ")
         });
-      });
     }
 
     getProduct(prdName: string): Promise<number> {
       const table: Table<Product, number> = this.getTable("product");
-      return new Promise((resolve, reject) => {
-        table.where({name: prdName}).toArray().then((products: Product[]) => {
-          return resolve(products[0].id);
+        return table.where({name: prdName}).toArray().then((products: Product[]) => {
+          return products[0].id;
         }).catch(err => {
           console.log(`error while getting the product  ${err} for ${prdName}`);
-            reject("failed to get the product");
+            throw new Error("failed to get the product");
         });
-      });
     }
 
     getTable<T, IndexableType>(schema: string): Table<T, IndexableType> {
